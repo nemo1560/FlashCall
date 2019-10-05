@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final List<String> reqPermissions = Arrays.asList(
                 Manifest.permission.CAMERA,
+                Manifest.permission.READ_PHONE_NUMBERS,
+                Manifest.permission.ACCESS_NETWORK_STATE,
                 Manifest.permission.READ_PHONE_STATE);
         final ArrayList<String> permissionsNeeded = getPermissionNeeded(new ArrayList<String>(reqPermissions));
 

@@ -18,6 +18,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class flash extends Service {
     private Camera camera;
     private Camera.Parameters parameters;
@@ -42,9 +43,7 @@ public class flash extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("SERVICE","!@#$%$%&%^*&^*");
-        IntentFilter intentFilter = new IntentFilter(Intents.call);
-        registerReceiver(callReceiver,intentFilter);
+        Log.d("CREATESERVICE","!@#$%$%&%^*&^#$#$^$%&#$%#&%$^*$%$^##%$*");
         try {
             camera();
             startThread();
@@ -60,6 +59,8 @@ public class flash extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        IntentFilter intentFilter = new IntentFilter(Intents.call);
+        registerReceiver(callReceiver,intentFilter);
         return START_STICKY;
     }
 
@@ -73,13 +74,14 @@ public class flash extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            sendBroadcast(new Intent(Intents.call));
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while(true){
+                sendBroadcast(new Intent(Intents.call));
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            runnable.run();
         }
     };
 
@@ -138,6 +140,7 @@ public class flash extends Service {
             super.onCallStateChanged(state, phoneNumber);
             Log.d("CALLNUMBER",phoneNumber);
             Log.d("FLASH","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            Log.d("STATE",state+"");
             if(state == TelephonyManager.CALL_STATE_RINGING){
                 if(status==0){
                     handler.post(new Runnable() {
@@ -154,6 +157,10 @@ public class flash extends Service {
                     });
                 }
             }else if(state == TelephonyManager.CALL_STATE_IDLE){
+                handler.removeCallbacksAndMessages(null);
+                status = 0;
+                turnOff();
+            }else if(state == TelephonyManager.CALL_STATE_OFFHOOK){
                 handler.removeCallbacksAndMessages(null);
                 status = 0;
                 turnOff();
