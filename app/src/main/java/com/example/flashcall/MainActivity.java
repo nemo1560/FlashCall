@@ -3,9 +3,11 @@ package com.example.flashcall;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -18,6 +20,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private String cameraId;
     private boolean status = false;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +48,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final List<String> reqPermissions = Arrays.asList(
                 Manifest.permission.CAMERA,
-                Manifest.permission.READ_PHONE_NUMBERS,
-                Manifest.permission.ACCESS_NETWORK_STATE,
                 Manifest.permission.READ_PHONE_STATE);
         final ArrayList<String> permissionsNeeded = getPermissionNeeded(new ArrayList<String>(reqPermissions));
 
@@ -54,15 +56,23 @@ public class MainActivity extends AppCompatActivity {
         } else {
             try {
                 init();
+                broadcast();
             } catch (CameraAccessException e) {
-                e.printStackTrace();
+                e.toString();
             }
         }
     }
 
+    private void broadcast() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+            ScheduleUtils.ScheduleUtils(getBaseContext());
+        }else {
+            Intent intent = new Intent(this,flash.class);
+            startService(intent);
+        }
+    }
+
     private void init() throws CameraAccessException {
-        Intent intent = new Intent(this,flash.class);
-        startService(intent);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
             cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
             cameraId = cameraManager.getCameraIdList()[0];

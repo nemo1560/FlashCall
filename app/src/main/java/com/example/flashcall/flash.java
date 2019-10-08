@@ -18,7 +18,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class flash extends Service {
     private Camera camera;
     private Camera.Parameters parameters;
@@ -34,16 +33,15 @@ public class flash extends Service {
             if(intent.getAction() == Intents.call){
                 TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 MyPhoneStateListener myPhoneStateListener = new MyPhoneStateListener();
-                telephonyManager.listen(myPhoneStateListener,PhoneStateListener.LISTEN_CALL_STATE);
+                telephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
             }
         }
     };
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("CREATESERVICE","!@#$%$%&%^*&^#$#$^$%&#$%#&%$^*$%$^##%$*");
+        Log.d("SERVICE","!@#$%$%&%^*&^*");
         try {
             camera();
             startThread();
@@ -74,10 +72,11 @@ public class flash extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            while(true){
+            while (true){
+                Log.d("SENDBROADCAST","SSSSSSSSSSSSSSSSSSSs");
                 sendBroadcast(new Intent(Intents.call));
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(5*1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -126,21 +125,28 @@ public class flash extends Service {
         }
         iFlash = true;
     }
-
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
+        Log.d("STOP","00000000000000000");
+        ScheduleUtils.ScheduleUtils(getBaseContext());
+        onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("STOP","00000000000000000");
+        ScheduleUtils.ScheduleUtils(getBaseContext());
         onCreate();
     }
 
     private class MyPhoneStateListener extends PhoneStateListener {
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void onCallStateChanged(int state, String phoneNumber) {
             super.onCallStateChanged(state, phoneNumber);
             Log.d("CALLNUMBER",phoneNumber);
             Log.d("FLASH","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-            Log.d("STATE",state+"");
             if(state == TelephonyManager.CALL_STATE_RINGING){
                 if(status==0){
                     handler.post(new Runnable() {
@@ -160,10 +166,7 @@ public class flash extends Service {
                 handler.removeCallbacksAndMessages(null);
                 status = 0;
                 turnOff();
-            }else if(state == TelephonyManager.CALL_STATE_OFFHOOK){
-                handler.removeCallbacksAndMessages(null);
-                status = 0;
-                turnOff();
+                onCreate();
             }
         }
     }
