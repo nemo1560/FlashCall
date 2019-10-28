@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
         final List<String> reqPermissions = Arrays.asList(
                 Manifest.permission.CAMERA,
                 Manifest.permission.READ_PHONE_STATE);
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 init();
                 broadcast();
+                Toast.makeText(this,"Start service",Toast.LENGTH_SHORT).show();
             } catch (CameraAccessException e) {
                 e.toString();
             }
@@ -73,6 +75,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() throws CameraAccessException {
+        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int ring = am.getRingerMode();
+        if(am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
+            am.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+        }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
             cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
             cameraId = cameraManager.getCameraIdList()[0];
@@ -83,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         btn = findViewById(R.id.btn);
-        btn.setOnClickListener(new View.OnClickListener() {
+        /*btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(status == false){
@@ -114,14 +121,14 @@ public class MainActivity extends AppCompatActivity {
                     status = false;
                 }
             }
-        });
+        });*/
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 finish();
             }
-        },2000);
+        },500);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -156,4 +163,9 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(MainActivity.this, permissions, REQUEST_CODE);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        broadcast();
+    }
 }
